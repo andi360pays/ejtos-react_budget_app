@@ -11,7 +11,9 @@ export const AppReducer = (state, action) => {
           return previousExp + currentExp.cost
         }, 0
       );
+      console.log('total_budget: '+ total_budget);
       total_budget = total_budget + action.payload.cost;
+      console.log('total_budget2: '+ total_budget);
       action.type = "DONE";
       if (total_budget <= state.budget) {
         total_budget = 0;
@@ -31,27 +33,32 @@ export const AppReducer = (state, action) => {
         }
       }
     case 'SUB_EXPENSE':
-      let total_budget_s = state.expenses.reduce(
-        (previousExp, currentExp) => previousExp + currentExp.cost, 0
+      let total_budget_sub = 0;
+      total_budget_sub = state.expenses.reduce(
+        (previousExp, currentExp) => {
+          return currentExp.cost - previousExp
+        }, 0
       );
-      total_budget_s -= action.payload.cost; // Subtract the cost of the action from the total budget
+      console.log('total_budget_sub: '+ total_budget_sub);
+      total_budget_sub = total_budget_sub - action.payload.cost;
+      console.log('total_budget_sub2: '+ total_budget_sub);
       action.type = "DONE";
-      if (total_budget_s >= 0) { // Check if the total budget is non-negative
-        state.expenses = state.expenses.map((currentExp) => {
+      if (total_budget_sub >= 0) {
+        // total_budget_sub = state.budget;
+        state.expenses.map((currentExp) => {
           if (currentExp.name === action.payload.name) {
-            // Subtract the cost from the expense
-            currentExp.cost -= action.payload.cost;
+            currentExp.cost = currentExp.cost - action.payload.cost;
           }
-          return currentExp;
+          return currentExp
         });
         return {
           ...state,
         };
       } else {
-        alert("Cannot decrease the allocation!"); // Alert if the total budget goes negative
+        alert("Cannot increase the allocation! Out of funds");
         return {
           ...state
-        };
+        }
       }
     case 'RED_EXPENSE':
       const red_expenses = state.expenses.map((currentExp) => {
@@ -101,7 +108,7 @@ export const AppReducer = (state, action) => {
 
 // 1. Sets the initial state when the app loads
 const initialState = {
-  budget: 20000,
+  budget: 2000,
   expenses: [
     { id: "Marketing", name: 'Marketing', cost: 50 },
     { id: "Finance", name: 'Finance', cost: 300 },
